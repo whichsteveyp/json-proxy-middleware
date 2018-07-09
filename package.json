@@ -1,0 +1,27 @@
+{
+  "name": "json-proxy-middleware",
+  "version": "0.0.0",
+  "description": "Simple express.js friendly json proxy middleware utility",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sprjr/json-proxy-middleware.git"
+  },
+  "keywords": [
+    "json",
+    "proxy",
+    "proxy",
+    "http",
+    "proxies",
+    "expressjs"
+  ],
+  "author": "James Smith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sprjr/json-proxy-middleware/issues"
+  },
+  "homepage": "https://github.com/sprjr/json-proxy-middleware#readme"
+}
