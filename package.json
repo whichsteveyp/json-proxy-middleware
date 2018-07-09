@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/sprjr/json-proxy-middleware/issues"
   },
-  "homepage": "https://github.com/sprjr/json-proxy-middleware#readme"
+  "homepage": "https://github.com/sprjr/json-proxy-middleware#readme",
+  "dependencies": {
+    "lodash": "^4.17.10",
+    "request": "^2.87.0"
+  }
 }
