@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "module": "commonjs",
     "allowJs": false,
-    "target": "es6",
+    "target": "es5",
     "sourceMap": true,
     "lib": ["es2017", "es2016", "dom"],
     "noUnusedLocals": true,
