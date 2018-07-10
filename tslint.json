@@ -11,16 +11,12 @@
         "singleline": "never"
       }
     ],
-    "quotemark": [true, "single", "jsx-single"],
+    "quotemark": [true, "single"],
     "semicolon": true,
     "ordered-imports": true,
     "import-spacing": true,
     "prefer-const": true,
     "class-name": true,
-    "jsx-no-lambda": false,
-    "jsx-alignment": false,
-    "jsx-no-multiline-js": false,
-    "jsx-wrap-multiline": false,
     "curly": true,
     "brace-style": [
       true,
@@ -29,7 +25,6 @@
         "allowSingleLine": false
       }
     ],
-    "jsx-boolean-value": "never",
     "no-require-imports": true
   },
   "no-invalid-template-strings": true,
@@ -60,5 +55,5 @@
   },
   "no-duplicate-switch-case": true,
   "no-implicit-dependencies": true,
-  "extends": ["tslint-react", "tslint-eslint-rules"]
+  "extends": ["tslint-eslint-rules"]
 }
