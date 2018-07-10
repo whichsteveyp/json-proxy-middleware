@@ -11,7 +11,7 @@ const MS_PER_NS: number = 1e6;
 //
 const reqOptions = ["method", "agentOptions"];
 // by default, we intend to proxy only json responses
-const defaultHeaders = {
+const defaultHeaders: object = {
   Accept: "application/json",
   "Content-Type": "application/json"
 };
@@ -27,11 +27,10 @@ type LoggerOption =
     };
 
 interface ProxyMiddlewareOptions {
-  urlHost: UrlHost;
+  additionalLogMessage: string;
   headers: HeaderOption;
   logger: LoggerOption;
-  disableLogging: boolean;
-  additionalLogMessage: string;
+  urlHost: UrlHost;
 }
 
 // This middleware proxies requests through Node to a backend service.
@@ -43,13 +42,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   res,
   next
 ) => {
-  const {
-    logger,
-    additionalLogMessage,
-    headers,
-    urlHost,
-    disableLogging
-  } = options;
+  const { logger, additionalLogMessage, headers, urlHost } = options;
   const { originalUrl, baseUrl } = req;
   const urlPath = originalUrl.replace(baseUrl, "");
   const requestToForward = _pick(req, reqOptions);
@@ -83,7 +76,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   const headersToUse: request.Headers =
     typeof headers === "function" ? headers(req, res) : headers || {};
 
-  const fullHeaders = {
+  const fullHeaders: request.Headers = {
     ...defaultHeaders,
     ...headersToUse
   };
@@ -97,7 +90,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
 
   const canLog = logger && logger.info && typeof logger.info === "function";
 
-  if (canLog && !disableLogging) {
+  if (canLog) {
     let fullMsg = "Proxy start.";
     if (additionalLogMessage) {
       fullMsg += ` ${additionalLogMessage}`;
