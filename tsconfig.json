@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "allowJs": false,
+    "target": "es6",
+    "sourceMap": true,
+    "lib": ["es2017", "es2016", "dom"],
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "pretty": true,
+    "rootDir": ".",
+    "preserveWatchOutput": true,
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./typings/index.d.ts",
+      "./node_modules/@types",
+      "./node_modules/**"
+    ]
+  }
+}
