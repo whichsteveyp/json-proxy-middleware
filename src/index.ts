@@ -8,13 +8,14 @@ import bunyan from "bunyan";
 // we use these for more accurate timing when logging
 const NS_PER_SEC: number = 1e9;
 const MS_PER_NS: number = 1e6;
-//
-const reqOptions = ["method", "agentOptions"];
+
 // by default, we intend to proxy only json responses
 const defaultHeaders: object = {
   Accept: "application/json",
   "Content-Type": "application/json"
 };
+
+const reqOptions = ["method", "agentOptions"];
 
 type UrlHost = string | ((req: Request, res: Response) => string);
 type HeaderOption = object | ((req: Request, res: Response) => request.Headers);
@@ -47,14 +48,8 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   const urlPath = originalUrl.replace(baseUrl, "");
   const requestToForward = _pick(req, reqOptions);
 
-  let proxyHost: string;
-  if (typeof urlHost === "function") {
-    proxyHost = urlHost(req, res);
-  } else {
-    proxyHost = urlHost;
-  }
-
-  if (typeof proxyHost !== "string") {
+  let host = typeof urlHost === "function" ? urlHost(req, res) : urlHost;
+  if (typeof host !== "string") {
     // error, should likely be converted to a VError
     next({
       errors: [
@@ -71,6 +66,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
         }
       ]
     });
+    return;
   }
 
   const headersToUse: request.Headers =
@@ -84,7 +80,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   requestToForward.headers = fullHeaders;
 
   const requestOptions = Object.assign(requestToForward, {
-    url: `${urlHost}${urlPath}`,
+    url: `${host}${urlPath}`,
     body: JSON.stringify(req.body)
   });
 
@@ -97,10 +93,10 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
     }
     logger.info(
       {
-        urlHost,
+        host,
         urlPath,
         headers: fullHeaders,
-        url: `${urlHost}${urlPath}`,
+        url: `${host}${urlPath}`,
         body: JSON.stringify(req.body)
       },
       fullMsg
@@ -117,10 +113,10 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
           status: 500,
           code: "PROXY_REQUEST_ERROR",
           title: "There was an error while making the proxied request.",
-          detail: `The proxied path is ${urlPath}. The host is ${urlHost}.`,
+          detail: `The proxied path is ${urlPath}. The host is ${host}.`,
           meta: {
             err,
-            url: `${urlHost}${urlPath}`
+            url: `${host}${urlPath}`
           }
         }
       ]
@@ -135,10 +131,10 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
           status: 500,
           code: "PROXY_RESPONSE_ERROR",
           title: "There was an error while streaming the response.",
-          detail: `The proxied path is ${urlPath}. The host is ${urlHost}.`,
+          detail: `The proxied path is ${urlPath}. The host is ${host}.`,
           meta: {
             err,
-            url: `${urlHost}${urlPath}`
+            url: `${host}${urlPath}`
           }
         }
       ]
@@ -155,7 +151,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
       const nanoseconds = diffTime[0] * NS_PER_SEC + diffTime[1];
       const milliseconds = nanoseconds / MS_PER_NS;
       const duration = `${milliseconds} ms`;
-      logger.info({ urlHost, urlPath, duration }, fullMsg);
+      logger.info({ host, urlPath, duration }, fullMsg);
     }
   });
 };
