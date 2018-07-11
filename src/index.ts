@@ -4,6 +4,7 @@ import _pick from "lodash/pick";
 import request from "request";
 import { RequestHandler, Request, Response } from "express";
 import bunyan from "bunyan";
+import VError from "verror";
 
 // we use these for more accurate timing when logging
 const NS_PER_SEC: number = 1e9;
@@ -50,22 +51,22 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
 
   let host = typeof urlHost === "function" ? urlHost(req, res) : urlHost;
   if (typeof host !== "string") {
-    // error, should likely be converted to a VError
-    next({
-      errors: [
+    next(
+      new VError(
         {
-          status: 500,
-          code: "PROXY_HOST_ERROR",
-          title: "`urlHost` could not be resolved to a valid string.",
-          detail:
-            `The options.urlHost provided either was not a string, or the value` +
-            `returned from invoking urlHost() was not a string.`,
-          meta: {
-            additionalLogMessage: additionalLogMessage || ""
+          name: "PROXY_HOST_ERROR",
+          info: {
+            detail:
+              `The options.urlHost provided either was not a string, or the value` +
+              `returned from invoking urlHost() was not a string.`,
+            meta: {
+              additionalLogMessage: additionalLogMessage || ""
+            }
           }
-        }
-      ]
-    });
+        },
+        "`urlHost` could not be resolved to a valid string."
+      )
+    );
     return;
   }
 
@@ -107,38 +108,42 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   const requestStream = request(requestOptions);
 
   requestStream.on("error", err =>
-    next({
-      errors: [
+    next(
+      new VError(
         {
-          status: 500,
-          code: "PROXY_REQUEST_ERROR",
-          title: "There was an error while making the proxied request.",
-          detail: `The proxied path is ${urlPath}. The host is ${host}.`,
-          meta: {
-            err,
-            url: `${host}${urlPath}`
+          name: "PROXY_REQUEST_ERROR",
+          cause: err,
+          info: {
+            detail: `The proxied path is ${urlPath}. The host is ${host}.`,
+            meta: {
+              additionalLogMessage: additionalLogMessage || "",
+              url: `${host}${urlPath}`
+            }
           }
-        }
-      ]
-    })
+        },
+        "There was an error while making the proxied request."
+      )
+    )
   );
 
   const responseStream = requestStream.pipe(res);
   responseStream.on("error", err =>
-    next({
-      errors: [
+    next(
+      new VError(
         {
-          status: 500,
-          code: "PROXY_RESPONSE_ERROR",
-          title: "There was an error while streaming the response.",
-          detail: `The proxied path is ${urlPath}. The host is ${host}.`,
-          meta: {
-            err,
-            url: `${host}${urlPath}`
+          name: "PROXY_RESPONSE_ERROR",
+          cause: err,
+          info: {
+            detail: `The proxied path is ${urlPath}. The host is ${host}.`,
+            meta: {
+              additionalLogMessage: additionalLogMessage || "",
+              url: `${host}${urlPath}`
+            }
           }
-        }
-      ]
-    })
+        },
+        "There was an error while streaming the response."
+      )
+    )
   );
 
   responseStream.on("finish", () => {

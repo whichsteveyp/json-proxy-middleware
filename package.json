@@ -27,7 +27,8 @@
   "homepage": "https://github.com/sprjr/json-proxy-middleware#readme",
   "dependencies": {
     "lodash": "^4.17.10",
-    "request": "^2.87.0"
+    "request": "^2.87.0",
+    "verror": "1.10.0"
   },
   "devDependencies": {
     "@types/bunyan": "1.8.4",
@@ -35,6 +36,7 @@
     "@types/lodash": "4.14.111",
     "@types/node": "10.5.2",
     "@types/request": "2.47.1",
+    "@types/verror": "1.10.3",
     "bunyan": "1.8.12",
     "gulp": "3.9.1",
     "gulp-typescript": "5.0.0-alpha.3",
