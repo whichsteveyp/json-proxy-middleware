@@ -49,8 +49,25 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   const urlPath = originalUrl.replace(baseUrl, '');
   const requestToForward = _pick(req, reqOptions);
 
+  const canLogError =
+    logger && logger.error && typeof logger.error === 'function';
   const host = typeof urlHost === 'function' ? urlHost(req, res) : urlHost;
   if (typeof host !== 'string') {
+    if (canLogError) {
+      let fullMsg = 'Proxy Error: PROXY_HOST_ERROR';
+      if (additionalLogMessage) {
+        fullMsg += ` ${additionalLogMessage}`;
+      }
+      logger.error(
+        {
+          host,
+          urlPath,
+          url: `${host}${urlPath}`,
+        },
+        fullMsg,
+      );
+    }
+
     next(
       new VError(
         {
@@ -85,9 +102,9 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
     body: JSON.stringify(req.body),
   });
 
-  const canLog = logger && logger.info && typeof logger.info === 'function';
+  const canLogInfo = logger && logger.info && typeof logger.info === 'function';
 
-  if (canLog) {
+  if (canLogInfo) {
     let fullMsg = 'Proxy start.';
     if (additionalLogMessage) {
       fullMsg += ` ${additionalLogMessage}`;
@@ -107,7 +124,22 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   const startTime = process.hrtime();
   const requestStream = request(requestOptions);
 
-  requestStream.on('error', err =>
+  requestStream.on('error', err => {
+    if (canLogError) {
+      let fullMsg = 'Proxy Error: PROXY_REQUEST_ERROR';
+      if (additionalLogMessage) {
+        fullMsg += ` ${additionalLogMessage}`;
+      }
+      logger.error(
+        {
+          host,
+          urlPath,
+          url: `${host}${urlPath}`,
+        },
+        fullMsg,
+      );
+    }
+
     next(
       new VError(
         {
@@ -123,11 +155,27 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
         },
         'There was an error while making the proxied request.',
       ),
-    ),
-  );
+    );
+    return;
+  });
 
   const responseStream = requestStream.pipe(res);
-  responseStream.on('error', err =>
+  responseStream.on('error', err => {
+    if (canLogError) {
+      let fullMsg = 'Proxy Error: PROXY_RESPONSE_ERROR';
+      if (additionalLogMessage) {
+        fullMsg += ` ${additionalLogMessage}`;
+      }
+      logger.error(
+        {
+          host,
+          urlPath,
+          url: `${host}${urlPath}`,
+        },
+        fullMsg,
+      );
+    }
+
     next(
       new VError(
         {
@@ -143,11 +191,12 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
         },
         'There was an error while streaming the response.',
       ),
-    ),
-  );
+    );
+    return;
+  });
 
   responseStream.on('finish', () => {
-    if (canLog) {
+    if (canLogInfo) {
       let fullMsg = 'Proxy end.';
       if (additionalLogMessage) {
         fullMsg += ` ${additionalLogMessage}`;
