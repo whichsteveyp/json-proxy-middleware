@@ -1,9 +1,14 @@
 {
   "name": "json-proxy-middleware",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Simple express.js friendly json proxy middleware utility",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,5 +28,24 @@
   "bugs": {
     "url": "https://github.com/sprjr/json-proxy-middleware/issues"
   },
-  "homepage": "https://github.com/sprjr/json-proxy-middleware#readme"
+  "homepage": "https://github.com/sprjr/json-proxy-middleware#readme",
+  "dependencies": {
+    "lodash": "^4.17.10",
+    "request": "^2.87.0",
+    "verror": "1.10.0"
+  },
+  "devDependencies": {
+    "@types/bunyan": "1.8.4",
+    "@types/express": "4.16.0",
+    "@types/lodash": "4.14.111",
+    "@types/node": "10.5.2",
+    "@types/request": "2.47.1",
+    "@types/verror": "1.10.3",
+    "bunyan": "1.8.12",
+    "gulp": "3.9.1",
+    "gulp-typescript": "5.0.0-alpha.3",
+    "tslint": "5.10.0",
+    "tslint-eslint-rules": "5.3.1",
+    "typescript": "2.9.2"
+  }
 }
