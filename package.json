@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Simple express.js friendly json proxy middleware utility",
   "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
