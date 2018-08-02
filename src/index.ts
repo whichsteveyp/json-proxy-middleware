@@ -39,7 +39,7 @@ interface ProxyMiddlewareOptions {
 // You _must_ register bodyParser.json() before mounting this middleware. Also,
 // it only works for JSON bodies (and not, for instance, form encoded bodies,
 // or bodies with YAML, or anything else like that).
-export default (options: ProxyMiddlewareOptions): RequestHandler => (
+module.exports = (options: ProxyMiddlewareOptions): RequestHandler => (
   req,
   res,
   next,
