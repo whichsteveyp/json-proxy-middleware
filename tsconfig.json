@@ -1,27 +1,14 @@
 {
   "compilerOptions": {
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "declaration": true,
     "esModuleInterop": true,
-    "lib": ["es2017", "es2016", "dom"],
+    "lib": ["es2016", "dom"],
     "module": "commonjs",
-    "moduleResolution": "node",
-    "noUnusedLocals": true,
-    "outDir": "dist",
-    "preserveWatchOutput": true,
-    "pretty": true,
-    "rootDir": "src",
-    "skipLibCheck": true,
+    "outDir": "./dist",
     "sourceMap": true,
-    "strict": true,
-    "target": "es5",
-    "typeRoots": [
-      "./typings/index.d.ts",
-      "./node_modules/@types",
-      "./node_modules/**"
-    ]
+    "target": "es5"
   },
-  "include": ["src/index.ts"]
+  "include": [
+    "./src/*"
+  ]
 }

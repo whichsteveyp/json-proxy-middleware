@@ -6,6 +6,23 @@ import _pick from 'lodash/pick';
 import request from 'request';
 import VError from 'verror';
 
+export type UrlHost = string | ((req: Request, res: Response) => string);
+export type HeaderOption = object | ((req: Request, res: Response) => request.Headers);
+export type LoggerOption =
+  | bunyan
+  | Console
+  | {
+      info(message?: any, ...optionalParams: any[]): void;
+      error(message?: any, ...optionalParams: any[]): void;
+    };
+
+export interface ProxyMiddlewareOptions {
+  additionalLogMessage: string;
+  headers: HeaderOption;
+  logger: LoggerOption;
+  urlHost: UrlHost;
+}
+
 // we use these for more accurate timing when logging
 const NS_PER_SEC: number = 1e9;
 const MS_PER_NS: number = 1e6;
@@ -18,28 +35,11 @@ const defaultHeaders: object = {
 
 const reqOptions = ['method', 'agentOptions'];
 
-type UrlHost = string | ((req: Request, res: Response) => string);
-type HeaderOption = object | ((req: Request, res: Response) => request.Headers);
-type LoggerOption =
-  | bunyan
-  | Console
-  | {
-      info(message?: any, ...optionalParams: any[]): void;
-      error(message?: any, ...optionalParams: any[]): void;
-    };
-
-interface ProxyMiddlewareOptions {
-  additionalLogMessage: string;
-  headers: HeaderOption;
-  logger: LoggerOption;
-  urlHost: UrlHost;
-}
-
 // This middleware proxies requests through Node to a backend service.
 // You _must_ register bodyParser.json() before mounting this middleware. Also,
 // it only works for JSON bodies (and not, for instance, form encoded bodies,
 // or bodies with YAML, or anything else like that).
-module.exports = (options: ProxyMiddlewareOptions): RequestHandler => (
+export default (options: ProxyMiddlewareOptions): RequestHandler => (
   req,
   res,
   next,
