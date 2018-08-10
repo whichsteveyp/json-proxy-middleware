@@ -78,6 +78,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
               `returned from invoking urlHost() was not a string.`,
             meta: {
               additionalLogMessage: additionalLogMessage || '',
+              body: req.body,
             },
           },
         },
@@ -150,6 +151,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
             meta: {
               additionalLogMessage: additionalLogMessage || '',
               url: `${host}${urlPath}`,
+              body: req.body,
             },
           },
         },
@@ -186,6 +188,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
             meta: {
               additionalLogMessage: additionalLogMessage || '',
               url: `${host}${urlPath}`,
+              body: req.body,
             },
           },
         },
