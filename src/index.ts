@@ -24,6 +24,10 @@ export interface ProxyMiddlewareOptions {
   urlHost: UrlHost;
 }
 
+interface AgentOptionsRequest extends Request {
+  agentOptions: any;
+}
+
 // we use these for more accurate timing when logging
 const NS_PER_SEC: number = 1e9;
 const MS_PER_NS: number = 1e6;
@@ -33,8 +37,6 @@ const defaultHeaders: object = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
 };
-
-const reqOptions = ['method', 'agentOptions'];
 
 // This middleware proxies requests through Node to a backend service.
 // You _must_ register bodyParser.json() before mounting this middleware. Also,
@@ -46,9 +48,8 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
   next,
 ) => {
   const { logger, additionalLogMessage, headers, urlHost } = options;
-  const { originalUrl, baseUrl } = req;
+  const { originalUrl, baseUrl, agentOptions } = req as AgentOptionsRequest;
   const urlPath = originalUrl.replace(baseUrl, '');
-  const requestToForward = _pick(req, reqOptions);
 
   const canLogError =
     logger && logger.error && typeof logger.error === 'function';
@@ -97,12 +98,13 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
     ...headersToUse,
   };
 
-  requestToForward.headers = fullHeaders;
-
-  const requestOptions = Object.assign(requestToForward, {
+  const requestOptions = {
+    ...agentOptions, // https://github.com/request/request/issues/2964
+    headers: fullHeaders,
+    method: req.method,
     url: `${host}${urlPath}`,
     body: JSON.stringify(req.body),
-  });
+  };
 
   const canLogInfo = logger && logger.info && typeof logger.info === 'function';
 
