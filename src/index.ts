@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import { Request, RequestHandler, Response } from 'express';
 import _pick from 'lodash/pick';
 import request from 'request';
+import { inspect } from 'util';
 import VError from 'verror';
 
 export type UrlHost = string | ((req: Request, res: Response) => string);
@@ -116,7 +117,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (
         urlPath,
         headers: fullHeaders,
         url: `${host}${urlPath}`,
-        body: JSON.stringify(req.body),
+        body: inspect(req.body, { maxArrayLength: 20 }),
       },
       fullMsg,
     );
