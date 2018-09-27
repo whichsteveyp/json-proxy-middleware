@@ -1,6 +1,6 @@
 {
   "name": "json-proxy-middleware",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Simple express.js friendly json proxy middleware utility",
   "main": "dist/index.js",
   "files": [
