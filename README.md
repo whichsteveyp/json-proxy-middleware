@@ -80,12 +80,13 @@ jsonProxy({
 });
 ```
 
-| property               | type                           | description                                                                                            |
-| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `additionalLogMessage` | `string` (optional)            | a message that will be appended to proxy start/end/error logging                                       |
-| `headers(req, res)`    | `object`/`function` (optional) | an object or function that returns an object with additional headers to forward on the proxied request |
-| `logger`               | logger instance (optional)     | any valid logger instance with methods `.info()` and `.error()` to be called with logging messages     |
-| `urlHost(req, res)`    | `string`/`function`            | a string or function that returns a string indicating a host to have a request proxied to              |
+| property               | type                            | description                                                                                            |
+| ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `additionalLogMessage` | `string` (optional)             | a message that will be appended to proxy start/end/error logging                                       |
+| `headers(req, res)`    | `object`/`function` (optional)  | an object or function that returns an object with additional headers to forward on the proxied request |
+| `logger`               | logger instance (optional)      | any valid logger instance with methods `.info()` and `.error()` to be called with logging messages     |
+| `addCurlHeader`        | `boolean`/`function` (optional) | attaches a curlCommand to your request headers for easier debugging (defaults to false)                |
+| `urlHost(req, res)`    | `string`/`function`             | a string or function that returns a string indicating a host to have a request proxied to              |
 
 ### `additionalLogMessage`
 
@@ -139,6 +140,29 @@ for debugging, such as when a proxy request started, when it ended, and how long
 took. We also log out errors in the event those occur. You can provide any kind of
 logger you prefer, as long as it has a `.info()` and `.error()` log level method to
 invoke.
+
+### `addCurlHeader`
+
+It's often useful to debug a request using a curl command. You can set this option to a boolean:
+
+```js
+router.get(
+  "/service/REST/v1/**",
+  jsonProxy({ urlHost: "https://my.service.url", addCurlHeader: true })
+);
+```
+
+Or set it conditionally:
+
+```js
+router.get(
+  "/service/REST/v1/**",
+  jsonProxy({
+    urlHost: "https://my.service.url",
+    addCurlHeader: (req, res) => req.originalUrl.includes('foo.bar'),
+  })
+);
+```
 
 ### `urlHost`
 
