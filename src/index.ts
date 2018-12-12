@@ -135,7 +135,10 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
   const shouldAddCurlHeader = addCurlHeader && typeof addCurlHeader === 'function'
     ? addCurlHeader(req, res)
     : addCurlHeader;
-  const curlCommand = shouldAddCurlHeader && createCurlRequest(requestOptions);
+
+  // Encode the curl command header to ensure it doesn't have invalid characters, otherwise
+  // request will throw an exception: https://github.com/request/request/issues/2120
+  const curlCommand = shouldAddCurlHeader && encodeURI(createCurlRequest(requestOptions));
   if (curlCommand && curlCommand.length < MAX_HEADER_SIZE) {
     res.setHeader('x-curl-command', curlCommand);
   }
