@@ -32,9 +32,9 @@ interface AgentOptionsRequest extends Request {
 const NS_PER_SEC: number = 1e9;
 const MS_PER_NS: number = 1e6;
 
-// Node's max header size is 80KB. We conservatively cap at 20KB.
+// Node's max header size is 80KB. We conservatively cap at 40KB.
 // https://github.com/nodejs/node/blob/8b4af64f50c5e41ce0155716f294c24ccdecad03/deps/http_parser/http_parser.h#L63
-const MAX_HEADER_SIZE: number = 20 * 1024;
+const MAX_HEADER_SIZE: number = 20 * 2048;
 
 // by default, we intend to proxy only json responses
 const defaultHeaders: object = {
@@ -135,7 +135,10 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
   const shouldAddCurlHeader = addCurlHeader && typeof addCurlHeader === 'function'
     ? addCurlHeader(req, res)
     : addCurlHeader;
-  const curlCommand = shouldAddCurlHeader && createCurlRequest(requestOptions);
+
+  // Encode the curl command header to ensure it doesn't have invalid characters, otherwise
+  // request will throw an exception: https://github.com/request/request/issues/2120
+  const curlCommand = shouldAddCurlHeader && encodeURI(createCurlRequest(requestOptions));
   if (curlCommand && curlCommand.length < MAX_HEADER_SIZE) {
     res.setHeader('x-curl-command', curlCommand);
   }
