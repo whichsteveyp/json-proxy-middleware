@@ -143,7 +143,9 @@ invoke.
 
 ### `addCurlHeader`
 
-It's often useful to debug a request using a curl command. You can set this option to a boolean:
+It's often useful to debug a request using a curl command. You will see this in
+your response headers as `headers['x-curl-command']`. You can set this option
+as a boolean:
 
 ```js
 router.get(
