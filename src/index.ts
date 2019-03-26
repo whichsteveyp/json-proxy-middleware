@@ -1,5 +1,6 @@
 import bunyan from 'bunyan';
 import { Request, RequestHandler, Response } from 'express';
+import http from 'http';
 import _pick from 'lodash/pick';
 import request, { CoreOptions, Headers, UrlOptions } from 'request';
 import { inspect } from 'util';
@@ -31,10 +32,7 @@ interface AgentOptionsRequest extends Request {
 // we use these for more accurate timing when logging
 const NS_PER_SEC: number = 1e9;
 const MS_PER_NS: number = 1e6;
-
-// Node's max header size is 80KB. We conservatively cap at 40KB.
-// https://github.com/nodejs/node/blob/8b4af64f50c5e41ce0155716f294c24ccdecad03/deps/http_parser/http_parser.h#L63
-const MAX_HEADER_SIZE: number = 20 * 2048;
+const TRUNCATED = '...<truncated due to header size>';
 
 // by default, we intend to proxy only json responses
 const defaultHeaders: object = {
@@ -49,6 +47,17 @@ const createCurlRequest = (requestOptions: request.CoreOptions & request.UrlOpti
   }, '');
   const requestBody = JSON.stringify(requestOptions.body || {});
   return `'${requestOptions.url}' -X ${requestOptions.method} ${headers} -d ${requestBody}`;
+};
+
+const getMaxHeaderSize = (): number => {
+  // This property is not on the typings but it's there. By default this is now 8KB in Node
+  // 10.15.x. This can be configured as a CLI argument currently, but not at run time:
+  // https://nodejs.org/api/cli.html#cli_max_http_header_size_size
+  const maxHeaderSize = (http as any).maxHeaderSize;
+
+  return maxHeaderSize
+    ? maxHeaderSize
+    : 8192;
 };
 
 // This middleware proxies requests through Node to a backend service.
@@ -139,8 +148,11 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
   // Encode the curl command header to ensure it doesn't have invalid characters, otherwise
   // request will throw an exception: https://github.com/request/request/issues/2120
   const curlCommand = shouldAddCurlHeader && encodeURI(createCurlRequest(requestOptions));
-  if (curlCommand && curlCommand.length < MAX_HEADER_SIZE) {
-    res.setHeader('x-curl-command', curlCommand);
+  if (curlCommand) {
+    const maxHeaderSize = getMaxHeaderSize();
+    res.setHeader('x-curl-command', curlCommand.length < maxHeaderSize
+      ? curlCommand
+      : `${curlCommand.slice(0, maxHeaderSize - TRUNCATED.length)}${TRUNCATED}`);
   }
 
   requestStream.on('error', err => {
