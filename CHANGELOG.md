@@ -6,6 +6,10 @@ and this project attempts to adhere to [Semantic Versioning](http://semver.org/s
 
 ## [Unreleased]
 
+## [0.0.9] - 2019-06-28
+### Fixed
+- Make allowed CURL header size more conservative.
+
 ## [0.0.4] - 2018-08-15
 ### Added
 - TypeScript watching, ala `yarn run watch`
