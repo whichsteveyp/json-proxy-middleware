@@ -1,6 +1,5 @@
 import bunyan from 'bunyan';
 import { Request, RequestHandler, Response } from 'express';
-import http from 'http';
 import _pick from 'lodash/pick';
 import request, { CoreOptions, Headers, UrlOptions } from 'request';
 import { inspect } from 'util';
@@ -40,25 +39,40 @@ const defaultHeaders: object = {
   'Content-Type': 'application/json',
 };
 
+/**
+ * None of our backends require these headers for their curl requests.
+ */
+const curlOmitHeaders = new Set([
+  'content-security-policy',
+  'x-dns-prefetch-control',
+  'x-frame-options',
+  'referer',
+  'accept-language',
+  'accept-encoding',
+  'pragma',
+  'cache-control',
+]);
+
 const createCurlRequest = (requestOptions: request.CoreOptions & request.UrlOptions) => {
   const requestHeaders = (requestOptions.headers || {});
   const headers = Object.keys((requestOptions.headers || {})).reduce((headersString, headerKey) => {
-    return `${headersString}-H '${headerKey}: ${requestHeaders[headerKey]}' `;
+    if (!curlOmitHeaders.has(headerKey)) {
+      return `${headersString}-H '${headerKey}: ${requestHeaders[headerKey]}' `;
+    }
+    return headersString;
   }, '');
   const requestBody = JSON.stringify(requestOptions.body || {});
   return `'${requestOptions.url}' -X ${requestOptions.method} ${headers} -d ${requestBody}`;
 };
 
-const getMaxHeaderSize = (): number => {
-  // This property is not on the typings but it's there. By default this is now 8KB in Node
-  // 10.15.x. This can be configured as a CLI argument currently, but not at run time:
-  // https://nodejs.org/api/cli.html#cli_max_http_header_size_size
-  const maxHeaderSize = (http as any).maxHeaderSize;
-
-  return maxHeaderSize
-    ? maxHeaderSize
-    : 8192;
-};
+/**
+ * As of node 10.14.0, the max header size was reduced to 8kb, which
+ * means the character length of the headers object must be less than
+ * 8000 characters. Rather than precisely measure which would be somewhat
+ * expensive, we conservatively allow 4000 characters.
+ * https://nodejs.org/api/cli.html#cli_max_http_header_size_size
+ */
+const maxHeaderSize = 4000;
 
 // This middleware proxies requests through Node to a backend service.
 // You _must_ register bodyParser.json() before mounting this middleware. Also,
@@ -149,7 +163,6 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
   // request will throw an exception: https://github.com/request/request/issues/2120
   const curlCommand = shouldAddCurlHeader && encodeURI(createCurlRequest(requestOptions));
   if (curlCommand) {
-    const maxHeaderSize = getMaxHeaderSize();
     res.setHeader('x-curl-command', curlCommand.length < maxHeaderSize
       ? curlCommand
       : `${curlCommand.slice(0, maxHeaderSize - TRUNCATED.length)}${TRUNCATED}`);
