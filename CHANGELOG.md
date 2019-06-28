@@ -6,6 +6,10 @@ and this project attempts to adhere to [Semantic Versioning](http://semver.org/s
 
 ## [Unreleased]
 
+## [0.0.10] - 2019-06-28
+### Fixed
+- Make `logger` an optional property in the TypeScript interface.
+
 ## [0.0.9] - 2019-06-28
 ### Fixed
 - Make allowed CURL header size more conservative.

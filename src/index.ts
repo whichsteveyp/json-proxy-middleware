@@ -19,9 +19,9 @@ export type LoggerOption =
 export interface ProxyMiddlewareOptions {
   additionalLogMessage: string;
   headers: HeaderOption;
-  logger: LoggerOption;
   urlHost: UrlHost;
   addCurlHeader?: AddCurlHeader;
+  logger?: LoggerOption;
 }
 
 interface AgentOptionsRequest extends Request {
@@ -51,6 +51,8 @@ const curlOmitHeaders = new Set([
   'accept-encoding',
   'pragma',
   'cache-control',
+  'host',
+  'connection',
 ]);
 
 const createCurlRequest = (requestOptions: request.CoreOptions & request.UrlOptions) => {
@@ -90,7 +92,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
       if (additionalLogMessage) {
         fullMsg += ` ${additionalLogMessage}`;
       }
-      logger.error(
+      logger!.error(
         {
           host,
           urlPath,
@@ -131,7 +133,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
     if (additionalLogMessage) {
       fullMsg += ` ${additionalLogMessage}`;
     }
-    logger.info(
+    logger!.info(
       {
         host,
         urlPath,
@@ -174,7 +176,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
       if (additionalLogMessage) {
         fullMsg += ` ${additionalLogMessage}`;
       }
-      logger.error(
+      logger!.error(
         {
           host,
           urlPath,
@@ -211,7 +213,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
       if (additionalLogMessage) {
         fullMsg += ` ${additionalLogMessage}`;
       }
-      logger.error(
+      logger!.error(
         {
           host,
           urlPath,
@@ -251,7 +253,7 @@ export default (options: ProxyMiddlewareOptions): RequestHandler => (req, res, n
       const nanoseconds = diffTime[0] * NS_PER_SEC + diffTime[1];
       const milliseconds = nanoseconds / MS_PER_NS;
       const duration = `${milliseconds} ms`;
-      logger.info({ host, urlPath, duration }, fullMsg);
+      logger!.info({ host, urlPath, duration }, fullMsg);
     }
   });
 };
